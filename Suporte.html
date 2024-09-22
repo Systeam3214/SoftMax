@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Funcionário - Enviar Suporte</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap');
+    @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+
+    body {
+      margin: 0;
+      font-family: 'Noto Sans', sans-serif;
+      background: #f4f6f9;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    .main-content {
+      width: 100%;
+      max-width: 800px;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      border: 1px solid #ddd;
+    }
+
+    h1 {
+      color: #003366;
+      font-weight: 700;
+      margin: 0 0 15px;
+      display: flex;
+      align-items: center;
+      font-size: 24px;
+    }
+
+    h1 i {
+      margin-right: 8px;
+      font-size: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .form-group input, .form-group textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: #f9f9f9;
+      font-size: 14px;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .btn-submit {
+      background: #007bff;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+
+    .btn-submit:hover {
+      background: #0056b3;
+    }
+
+    .requests-card {
+      margin-top: 20px;
+    }
+
+    .requests-card h2 {
+      color: #003366;
+      font-weight: 700;
+      margin: 0 0 15px;
+      font-size: 20px;
+    }
+
+    .request-item {
+      background: #f1f1f1;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+    }
+
+    .request-item > p {
+      margin: 0;
+      color: #333;
+    }
+
+    .request-item > span {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .request-item i {
+      margin-right: 4px;
+      color: #007bff;
+    }
+
+    .request-item .details-btn,
+    .request-item .cancel-btn {
+      background: #007bff;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+
+    .request-item .details-btn:hover,
+    .request-item .cancel-btn:hover {
+      background: #0056b3;
+    }
+
+    .request-item .cancel-btn {
+      background: #dc3545;
+    }
+
+    .request-item .cancel-btn:hover {
+      background: #c82333;
+    }
+
+    /* Estilos do Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      width: 80%;
+      max-width: 600px;
+      position: relative;
+    }
+
+    .btn-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #333;
+    }
+
+    .feedback-stars {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+    }
+
+    .feedback-stars input {
+      display: none;
+    }
+
+    .feedback-stars label {
+      font-size: 24px;
+      cursor: pointer;
+      color: #ddd;
+    }
+
+    .feedback-stars input:checked ~ label {
+      color: #ffc107;
+    }
+
+    .btn-submit-feedback {
+      background: #007bff;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+
+    .btn-submit-feedback:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-content">
+    <h1><i class="fas fa-headset"></i>Suporte</h1>
+
+    <form id="supportForm">
+      <div class="form-group">
+        <label for="employeeName">Seu Nome:</label>
+        <input type="text" id="employeeName" name="employeeName" required>
+      </div>
+
+      <div class="form-group">
+        <label for="supportIssue">Descrição do Problema:</label>
+        <textarea id="supportIssue" name="supportIssue" required></textarea>
+      </div>
+
+      <button type="submit" class="btn-submit">Enviar Solicitação</button>
+    </form>
+
+    <div class="requests-card">
+      <h2><i class="fas fa-list-alt"></i>Solicitações Enviadas</h2>
+      <div id="request-list">
+        <!-- As solicitações de suporte serão listadas aqui -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Detalhes e Feedback -->
+  <div id="detailsModal" class="modal">
+    <div class="modal-content">
+      <span class="btn-close" onclick="closeModal()">&times;</span>
+      <h2>Detalhes do Suporte</h2>
+      <div id="modal-details-content">
+        <!-- Detalhes do suporte serão exibidos aqui -->
+      </div>
+      <button class="btn-submit-feedback" onclick="openFeedbackModal()">Enviar Feedback</button>
+    </div>
+  </div>
+
+  <!-- Modal para Feedback -->
+  <div id="feedbackModal" class="modal">
+    <div class="modal-content">
+      <span class="btn-close" onclick="closeFeedbackModal()">&times;</span>
+      <h2>Enviar Feedback</h2>
+      <div class="feedback-stars">
+        <input type="radio" id="star5" name="rating" value="5"><label for="star5">&#9733;</label>
+        <input type="radio" id="star4" name="rating" value="4"><label for="star4">&#9733;</label>
+        <input type="radio" id="star3" name="rating" value="3"><label for="star3">&#9733;</label>
+        <input type="radio" id="star2" name="rating" value="2"><label for="star2">&#9733;</label>
+        <input type="radio" id="star1" name="rating" value="1"><label for="star1">&#9733;</label>
+      </div>
+      <button class="btn-submit-feedback" onclick="submitFeedback()">Enviar Feedback</button>
+    </div>
+  </div>
+
+  <script>
+    // Abrir Modal de Detalhes
+    function openModal(requestId, details) {
+      document.getElementById("modal-details-content").innerHTML = details;
+      document.getElementById("detailsModal").style.display = "flex";
+    }
+
+    // Fechar Modal de Detalhes
+    function closeModal() {
+      document.getElementById("detailsModal").style.display = "none";
+    }
+
+    // Abrir Modal de Feedback
+    function openFeedbackModal() {
+      document.getElementById("feedbackModal").style.display = "flex";
+    }
+
+    // Fechar Modal de Feedback
+    function closeFeedbackModal() {
+      document.getElementById("feedbackModal").style.display = "none";
+    }
+
+    // Enviar Feedback
+    function submitFeedback() {
+      // Aqui você pode implementar a lógica para enviar o feedback
+      alert('Feedback enviado com sucesso!');
+      closeFeedbackModal();
+    }
+
+    // Cancelar Solicitação
+    function cancelRequest(requestId) {
+      // Remover a solicitação da lista
+      const requestItem = document.getElementById(`request-${requestId}`);
+      if (requestItem) {
+        requestItem.remove();
+      }
+      // Aqui você pode adicionar lógica para cancelar a solicitação no backend
+      alert('Solicitação cancelada com sucesso!');
+    }
+
+    // Enviar Solicitação de Suporte
+    document.getElementById("supportForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+      const requestId = Date.now(); // Simulação de ID único
+      const employeeName = document.getElementById("employeeName").value;
+      const supportIssue = document.getElementById("supportIssue").value;
+      const requestItem = `
+        <div class="request-item" id="request-${requestId}">
+          <p><strong>Nome:</strong> ${employeeName}</p>
+          <p><strong>Descrição:</strong> ${supportIssue}</p>
+          <span>Status: <strong>Pendente</strong></span>
+          <button class="details-btn" onclick="openModal(${requestId}, '<strong>Nome:</strong> ${employeeName}<br><strong>Descrição:</strong> ${supportIssue}<br><strong>Status:</strong> Pendente')">Detalhes</button>
+          <button class="cancel-btn" onclick="cancelRequest(${requestId})">Cancelar Chamado</button>
+        </div>
+      `;
+      document.getElementById("request-list").innerHTML += requestItem;
+      document.getElementById("supportForm").reset();
+    });
+  </script>
+</body>
+</html>

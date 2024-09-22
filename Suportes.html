@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recepção de Solicitações - Suporte</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap');
+    @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+
+    body {
+      margin: 0;
+      font-family: 'Noto Sans', sans-serif;
+      background: #f4f6f9;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .main-content {
+      width: 100%;
+      max-width: 800px;
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      border: 1px solid #ddd;
+    }
+
+    h1 {
+      color: #003366;
+      font-weight: 700;
+      margin: 0 0 15px;
+      display: flex;
+      align-items: center;
+      font-size: 24px;
+    }
+
+    h1 i {
+      margin-right: 8px;
+      font-size: 20px;
+    }
+
+    .requests-card {
+      margin-top: 20px;
+    }
+
+    .requests-card h2 {
+      color: #003366;
+      font-weight: 700;
+      margin: 0 0 15px;
+      font-size: 20px;
+    }
+
+    .request-item {
+      background: #f1f1f1;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+    }
+
+    .request-item > p {
+      margin: 0;
+      color: #333;
+    }
+
+    .request-item > span {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+
+    .request-item i {
+      margin-right: 4px;
+      color: #007bff;
+    }
+
+    .request-item .details-btn,
+    .request-item .cancel-btn,
+    .request-item .reply-btn {
+      background: #007bff;
+      border: none;
+      border-radius: 4px;
+      color: #fff;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+
+    .request-item .details-btn:hover,
+    .request-item .cancel-btn:hover,
+    .request-item .reply-btn:hover {
+      background: #0056b3;
+    }
+
+    .request-item .cancel-btn {
+      background: #dc3545;
+    }
+
+    .request-item .cancel-btn:hover {
+      background: #c82333;
+    }
+
+    /* Estilo do modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      text-align: center;
+    }
+
+    .modal textarea {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: 'Noto Sans', sans-serif;
+    }
+
+    .modal button {
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .modal button:hover {
+      background: #0056b3;
+    }
+
+    .modal .close-btn {
+      background: #dc3545;
+      margin-left: 10px;
+    }
+
+    .modal .close-btn:hover {
+      background: #c82333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="main-content">
+    <h1><i class="fas fa-list-alt"></i> Solicitações de Suporte Recebidas</h1>
+
+    <div class="requests-card">
+      <h2>Lista de Solicitações</h2>
+      <div id="request-list">
+        <!-- As solicitações de suporte serão listadas aqui -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de resposta -->
+  <div class="modal" id="replyModal">
+    <div class="modal-content">
+      <h3>Responder Solicitação</h3>
+      <textarea id="responseMessage" placeholder="Escreva sua resposta"></textarea>
+      <button onclick="sendResponse()">Enviar Resposta</button>
+      <button class="close-btn" onclick="closeModal()">Cancelar</button>
+    </div>
+  </div>
+
+  <script>
+    let selectedRequestKey = '';
+
+    // Função para listar as solicitações de suporte
+    function listRequests() {
+      const requestList = document.getElementById('request-list');
+      requestList.innerHTML = ''; // Limpa a lista
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('request_')) {
+          const requestData = JSON.parse(localStorage.getItem(key));
+
+          const item = document.createElement('div');
+          item.classList.add('request-item');
+
+          item.innerHTML = `
+            <p><i class="fas fa-user"></i> <strong>Nome:</strong> ${requestData.employeeName}</p>
+            <p><i class="fas fa-exclamation-circle"></i> <strong>Problema:</strong> ${requestData.supportIssue}</p>
+            <span><i class="fas fa-clock"></i> <strong>Enviado em:</strong> ${requestData.timestamp}</span>
+            <p><strong>Status:</strong> <span style="color: ${requestData.status === 'Pendente' ? 'orange' : 'green'}">${requestData.status}</span></p>
+            <button class="details-btn" onclick="markAsResolved('${key}')">Marcar como Resolvido</button>
+            <button class="cancel-btn" onclick="deleteRequest('${key}')">Excluir Solicitação</button>
+            <button class="reply-btn" onclick="openReplyModal('${key}')">Responder</button>
+          `;
+
+          requestList.appendChild(item);
+        }
+      }
+    }
+
+    // Função para abrir o modal de resposta
+    function openReplyModal(key) {
+      selectedRequestKey = key; // Guarda a solicitação selecionada
+      document.getElementById('replyModal').style.display = 'flex';
+    }
+
+    // Função para fechar o modal
+    function closeModal() {
+      document.getElementById('replyModal').style.display = 'none';
+    }
+
+    // Função para enviar uma resposta
+    function sendResponse() {
+      const responseMessage = document.getElementById('responseMessage').value;
+      if (responseMessage.trim() === '') {
+        alert('Por favor, escreva uma resposta.');
+        return;
+      }
+
+      const requestData = JSON.parse(localStorage.getItem(selectedRequestKey));
+      requestData.response = responseMessage;
+      localStorage.setItem(selectedRequestKey, JSON.stringify(requestData));
+
+      alert('Resposta enviada com sucesso!');
+      closeModal(); // Fecha o modal
+      listRequests(); // Atualiza a lista
+    }
+
+    // Função para marcar uma solicitação como resolvida
+    function markAsResolved(key) {
+      const requestData = JSON.parse(localStorage.getItem(key));
+      requestData.status = 'Resolvido';
+      localStorage.setItem(key, JSON.stringify(requestData));
+      listRequests(); // Atualiza a lista
+    }
+
+    // Função para excluir uma solicitação
+    function deleteRequest(key) {
+      localStorage.removeItem(key);
+      listRequests(); // Atualiza a lista
+    }
+
+    // Lista as solicitações ao carregar a página
+    document.addEventListener('DOMContentLoaded', listRequests);
+  </script>
+
+</body>
+</html>
