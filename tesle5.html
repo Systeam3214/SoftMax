@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Concert</title>
+  <style>
+    /* Estilos em preto e branco */
+
+    body {
+      font-family: 'Noto Sans', sans-serif;
+      background-color: #f0f0f0;
+      color: #000;
+    }
+
+    header {
+      background-color: #000;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .calls-list {
+      background-color: #fff;
+      color: #000;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .calls-list h2 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    #calls-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #calls-list li {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      position: relative;
+      color: #000;
+    }
+
+    #calls-list li:last-child {
+      border-bottom: none;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 10px; /* Espaço entre os botões */
+      margin-top: 10px;
+    }
+
+    .concluir, .detalhes {
+      background-color: #333;
+      color: #fff;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .concluir:hover, .detalhes:hover {
+      background-color: #555;
+    }
+
+    .ban-message {
+      display: none;
+      background-color: #f44336;
+      color: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 600px;
+      position: relative;
+      color: #000;
+    }
+
+    .modal-content h2 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .modal-content p {
+      color: #333;
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #f44336;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    /* Botão Voltar */
+    .btn-voltar {
+      margin-top: 20px;
+      background-color: #333;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 16px;
+    }
+
+    .btn-voltar:hover {
+      background-color: #555;
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Chamados</h1>
+  </header>
+  <main>
+    <section class="calls-list">
+      <h2>Chamadas (<span id="calls-count">0</span>)</h2>
+      <ul id="calls-list"></ul>
+      <div class="ban-message" id="ban-message">
+        Sua conta foi banida permanentemente. Se foi um engano, contate o Suporte.
+      </div>
+    </section>
+
+    <!-- Botão Voltar -->
+    <a href="fun0.html" class="btn-voltar">Voltar</a>
+  </main>
+
+  <!-- Modal de detalhes -->
+  <div class="modal" id="details-modal">
+    <div class="modal-content">
+      <button class="close-modal" onclick="closeModal()">X</button>
+      <h2>Detalhes da Chamada</h2>
+      <p id="modal-details"></p>
+      <p id="modal-description" style="display: none;"><strong>Descrição:</strong> <span id="description-text"></span></p>
+    </div>
+  </div>
+
+  <script>
+    // Variáveis globais
+    let callStorage = JSON.parse(localStorage.getItem('calls')) || [];
+
+    // Função para renderizar lista de chamadas
+    function renderCallsList() {
+      const callsList = document.getElementById('calls-list');
+      const callsCount = document.getElementById('calls-count');
+      const banMessage = document.getElementById('ban-message');
+      callsList.innerHTML = '';
+
+      // Filtra chamadas que ainda não foram concluídas
+      const activeCalls = callStorage.filter(call => !call.concluída);
+      callsCount.textContent = activeCalls.length;
+      banMessage.style.display = 'none'; // Esconde a mensagem de banimento
+
+      activeCalls.forEach(call => {
+        const callItem = document.createElement('li');
+        callItem.innerHTML = `
+          Chamada para ${call.employee} - Motivo: ${call.reason} - Localização: ${call.location} - Modelo: ${call.model}
+          <div class="button-container">
+            <button class="concluir" onclick="concluirChamado(${call.id})">Concluído</button>
+            <button class="detalhes" onclick="showDetails(${call.id})">Mais detalhes</button>
+          </div>
+        `;
+        callsList.appendChild(callItem);
+      });
+    }
+
+    // Função para concluir chamado
+    function concluirChamado(id) {
+      if (confirm(`Você deseja remover a chamada de ${callStorage.find(call => call.id === id).employee}?`)) {
+        // Remove a chamada do array
+        callStorage = callStorage.filter(call => call.id !== id);
+        localStorage.setItem('calls', JSON.stringify(callStorage));
+        renderCallsList(); // Atualiza a lista visível
+      }
+    }
+
+    // Função para mostrar detalhes da chamada
+    function showDetails(id) {
+      const modal = document.getElementById('details-modal');
+      const modalDetails = document.getElementById('modal-details');
+      const modalDescription = document.getElementById('modal-description');
+      const descriptionText = document.getElementById('description-text');
+      const call = callStorage.find(call => call.id === id);
+
+      modalDetails.innerHTML = `
+        <strong>Funcionário:</strong> ${call.employee}<br>
+        <strong>Motivo:</strong> ${call.reason}<br>
+        <strong>Localização:</strong> ${call.location}<br>
+        <strong>Modelo:</strong> ${call.model}
+      `;
+      
+      if (call.descrição) {
+        descriptionText.textContent = call.descrição;
+        modalDescription.style.display = 'block';
+      } else {
+        modalDescription.style.display = 'none';
+      }
+
+      modal.style.display = 'flex';
+    }
+
+    // Função para fechar o modal
+    function closeModal() {
+      document.getElementById('details-modal').style.display = 'none';
+    }
+
+    // Renderizar lista de chamadas
+    renderCallsList();
+
+    // Atualizar lista de chamadas em tempo real
+    setInterval(() => {
+      renderCallsList();
+    }, 1000);
+  </script>
+</body>
+</html>
